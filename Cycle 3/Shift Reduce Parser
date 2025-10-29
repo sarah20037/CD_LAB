@@ -73,7 +73,7 @@ int main()
     int i=0;
     while(input[i]!='\0')//Loop until end of input
     {
-        printf("%-20s %-20s SHIFT %c\n", stack, input + i, input[i]);//
+        printf("%-20s %-20s SHIFT %c\n", stack, input + i, input[i]);
         push(input[i]);//push current input symbol to stack
         i++;//move to next input symbol 
         while(reduce(rules,n));//check if it matches any production
