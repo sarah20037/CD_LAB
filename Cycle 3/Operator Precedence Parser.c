@@ -2,25 +2,10 @@
 #include <string.h>
 
 char stack[50];
-int top=-1;
+int top = -1;
 
-void push(char c)
-{
-    stack[++top]=c;
-}
-void pop()
-{
-    if(top>=0)
-    top--;
-}
-
-char peek()
-{
-    if(top>=0)
-    return stack[top];
-    return '\0';
-}
-
+// Precedence table
+//       +    *    i    (    )    $
 char precedence[6][6] = {
     // +    *    i    (    )    $
     {'>', '<', '<', '<', '>', '>'}, // +
@@ -31,66 +16,102 @@ char precedence[6][6] = {
     {'<', '<', '<', '<', ' ', '='}  // $
 };
 
-int getindex(char c)
+int getIndex(char c)
 {
-    switch(c)
+    switch (c)
     {
-        case '+':return 0;
-        case '*':return 1;
-        case 'i':return 2;
-        case '(':return 3;
-        case ')':return 4;
-        case '$':return 5;
+    case '+': return 0;
+    case '*': return 1;
+    case 'i': return 2;
+    case '(': return 3;
+    case ')': return 4;
+    case '$': return 5;
+    default: return -1;
     }
-    return -1;
+}
+
+void push(char c)
+{
+    stack[++top] = c;
+}
+
+void pop()
+{
+    if (top >= 0)
+        top--;
+}
+
+char peek()
+{
+    if (top >= 0)
+        return stack[top];
+    return '\0';
 }
 
 int main()
 {
     char input[50];
-    printf("enter the input \n");
-    scanf("%s",input);
-    strcat(input,"$");
-    push('$');
-    int i=0;
-    char a=input[i];
+    printf("Enter input: ");
+    scanf("%s", input);
+
+    // Append $ at end
+    int len = strlen(input);
+    input[len] = '$';
+    input[len + 1] = '\0';
+
+    push('$'); // initialize stack with $
+
+    int i = 0;
+    char a = input[i];
+
     printf("\nSTACK\t\tINPUT\t\tACTION\n");
-    while(1)
+    printf("---------------------------------\n");
+
+    while (1)
     {
-        printf("%s\t%s\t\t",stack,input+i);
-        char topc=peek();
-        if(topc=='$'&&a=='$')
+        char topc = peek();
+
+        // display current stack and remaining input
+        for (int j = 0; j <= top; j++)
+            printf("%c", stack[j]);
+        printf("\t\t%s\t\t", &input[i]);
+
+        if (topc == '$' && a == '$')
         {
-            printf("ACCEPTED\n");
+            printf("String Accepted!\n");
             break;
         }
-        if(a=='$')
+
+        int row = getIndex(topc);
+        int col = getIndex(a);
+
+        if (row == -1 || col == -1)
         {
-            printf("REDUCE\n");
-            pop();
-            continue;
+            printf("Invalid symbol!\n");
+            break;
         }
-        int row=getindex(topc);
-        int col=getindex(a);
-        char rel=precedence[row][col];
-        if(rel=='<'||rel=='=')
+
+        char relation = precedence[row][col];
+
+        if (relation == '<' || relation == '=')
         {
-            printf("SHIFT %c\n",a);
+            // shift
             push(a);
-            a=input[++i];
-            
+            printf("Shift %c\n", a);
+            a = input[++i];
         }
-        else if(rel=='>')
+        else if (relation == '>')
         {
-            printf("REDUCE\n");
+            // reduce
+            printf("Reduce\n");
             pop();
         }
         else
         {
-            printf("invalid relation \n");
+            printf("Error: Invalid relation\n");
             break;
         }
     }
+
     return 0;
-    
 }
